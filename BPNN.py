@@ -1,6 +1,5 @@
 import numpy as np
-from numpy.random import random
-import math
+from numpy.random import random,permutation
 
 class BPNN:
 	"""backpropagation neural networks"""
@@ -30,13 +29,12 @@ class BPNN:
 
 	def fit(self,train_x,train_y):
 		for _ in range(self.__steps):
-			for idx, x in enumerate(train_x):
+			for idx in permutation(train_x.shape[0]):#SGD
+				x = train_x[idx]
 				y = train_y[idx] 
 				ho, yo = self.__output(x)# output of hidden and output layer
 				err = np.sum(np.power(yo - y,2)) / 2
-				print(err)
-				if err < self.__err:
-					return
+				if err < self.__err:return
 				g = yo * (1 - yo) * (y - yo)#gradient of output layer
 				e = np.array([ho[i] * (1 - ho[i]) * np.dot(self.__who.T[i],g) for i in range(self.nh)])
 				
@@ -48,13 +46,12 @@ class BPNN:
 					self.__wih[i] += self.lr_h * e[i] * x 
 				self.__bh -= self.lr_h * e
 
-
-
 	def predict(self,test_x):
-		pass
+		return np.array([list(map(lambda f:1 if f > 0.5 else 0,self.__output(x)[1])) for x in test_x])
 
-	def report(self):
-		pass
+	def report(self,predict_y,test_y):
+		precision = np.all((predict_y == test_y),axis=1).sum() / len(test_y)
+		print(precision)
 
 	def __sigmoid(self,x):
 		return 1 / (1 + np.exp(-x))	
@@ -73,7 +70,7 @@ class BPNN:
 if __name__ == '__main__':
 	import numpy as np
 	from sklearn.preprocessing import OneHotEncoder
-	from sklearn.datasets import load_iris
+	from sklearn.datasets import load_iris,load_digits
 	from sklearn.model_selection import train_test_split
 	from sklearn.preprocessing import Normalizer,MinMaxScaler
 
@@ -84,7 +81,8 @@ if __name__ == '__main__':
 	target = iris.target
 	target = OneHotEncoder().fit_transform(iris.target.reshape((-1,1))).toarray()
 	train_x,test_x,train_y,test_y = train_test_split(data,target,test_size=0.2)
-	bpnn = BPNN(4,10,3,0.5,0.5,30,1e-6)
+	bpnn = BPNN(4,10,3,0.1,0.1,50,1e-6)
 	bpnn.fit(train_x,train_y)
+	bpnn.report(bpnn.predict(test_x),test_y)
 
 	
