@@ -68,9 +68,9 @@ class CARTRegressor:
 
     def getMean(self,tree):
         if isinstance(tree['left'],dict):#dict说明不是叶子节点
-            tree['left'] = self.getLeafs(tree['left'])
+            tree['left'] = self.getMean(tree['left'])
         if isinstance(tree['right'],dict):
-            tree['right'] = self.getLeafs(tree['right'])
+            tree['right'] = self.getMean(tree['right'])
         return (tree['left'] + tree['right']) / 2 
 
     def prune(self,tree,eval_sets):#后剪枝
