@@ -114,7 +114,7 @@ def main():
     data = bst.data 
     target = bst.target
     x_train,x_test,y_train,y_test = train_test_split(data,target,test_size=0.2,random_state=0)
-    cart = CART(5,5)
+    cart = CARTRegressor(5,5)
     cart.fit(x_train,y_train,eval_sets=(x_test,y_test))
     print(np.mean(np.abs(cart.predict(x_test)-y_test)))
 
